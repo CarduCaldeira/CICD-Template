@@ -1,0 +1,20 @@
+name: Advanced CI Workflow
+
+on:
+  workflow_dispatch:
+
+jobs:
+  web-instance:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up instance
+        run: |
+          echo "Simulating instance setup on GitHub-hosted runner"
+          echo "Instance setup complete."
+
+  self-hosted-task:
+    runs-on: self-hosted
+    needs: web-instance
+    steps:
+      - name: Perform task on self-hosted runner
+        run: echo "Running task on self-hosted runner after instance setup."

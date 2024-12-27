@@ -1,0 +1,13 @@
+[project]
+name = "jarvis-test"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "jlclient",
+    "requests>=2.32.3",
+]
+
+[tool.uv.sources]
+jlclient = { git = "https://github.com/jarvislabsai/jlclient.git" }

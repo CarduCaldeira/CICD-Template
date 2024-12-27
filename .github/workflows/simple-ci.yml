@@ -1,7 +1,9 @@
 name: Advanced CI Workflow
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   web-instance:

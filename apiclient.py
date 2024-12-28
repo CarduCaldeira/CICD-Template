@@ -1,5 +1,5 @@
 import os
-import time 
+import sys
 from jlclient import jarvisclient
 from jlclient.jarvisclient import *
 
@@ -64,5 +64,16 @@ if __name__ == '__main__':
     instance_name= os.getenv("INSTANCE_NAME")
     script_name = os.getenv("SCRIPT_NAME")
    
-    run_instance(instance_name, script_name)
-    stop_instance(instance_name)
+    if len(sys.argv) != 2:
+        print("Usage: python apiclient.py <function_name>")
+        sys.exit(1)
+
+    function_name = sys.argv[1]
+    
+    if function_name == 'run_instance':
+        run_instance(instance_name, script_name)
+    elif function_name == 'stop_instance':
+        stop_instance(instance_name)
+    else:
+        print(f"Function '{function_name}' not recognized.")
+        sys.exit(1)

@@ -1,4 +1,4 @@
-name: Advanced CI Workflow
+name: CI Workflow
 
 on:
   push:
@@ -9,10 +9,26 @@ jobs:
   web-instance:
     runs-on: ubuntu-latest
     steps:
-      - name: Set up instance
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
         run: |
-          echo "Simulating instance setup on GitHub-hosted runner"
-          echo "Instance setup complete."
+          python -m pip install --upgrade pip
+          pip install -r requirements_jarvis.txt  
+
+      - name: Execute instance setup script
+        env:
+          TOKEN_JARVIS: ${{ secrets.TOKEN_JARVIS }}
+          INSTANCE_NAME: ${{ vars.INSTANCE_NAME }}
+          SCRIPT_NAME: ${{ vars.SCRIPT_NAME }}
+        run: |
+          python apiclient.py run_instance
 
   self-hosted-task:
     runs-on: self-hosted
@@ -20,3 +36,14 @@ jobs:
     steps:
       - name: Perform task on self-hosted runner
         run: echo "Running task on self-hosted runner after instance setup."
+
+  pause-instance:
+    runs-on: ubuntu-latest
+    needs: self-hosted-task
+    steps:
+      - name: Pause instance
+        env:
+          TOKEN_JARVIS: ${{ secrets.TOKEN_JARVIS }}
+          INSTANCE_NAME: ${{ vars.INSTANCE_NAME }}
+        run: |
+          python apiclient.py stop_instance

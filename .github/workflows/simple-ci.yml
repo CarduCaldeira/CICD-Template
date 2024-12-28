@@ -37,8 +37,8 @@ jobs:
       - name: Create a log file with timestamp
         run: |
           timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-          echo "Task executed on self-hosted runner at $timestamp" > /home/log_file.txt
-          echo "Log file created at /home/log_file.txt"
+          echo "Task executed on self-hosted runner at $timestamp" > /home/novousuario/log_file.txt
+          echo "Log file created at /home/novousuario/log_file.txt"
 
   pause-instance:
     runs-on: ubuntu-latest

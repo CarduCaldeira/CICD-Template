@@ -11,6 +11,5 @@ wheels/
 
 .env
 
-apiclient.py
 teste.ipynb
 uv.lock

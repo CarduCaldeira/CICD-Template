@@ -34,8 +34,11 @@ jobs:
     runs-on: self-hosted
     needs: web-instance
     steps:
-      - name: Perform task on self-hosted runner
-        run: echo "Running task on self-hosted runner after instance setup."
+      - name: Create a log file with timestamp
+        run: |
+          timestamp=$(date "+%Y-%m-%d %H:%M:%S")
+          echo "Task executed on self-hosted runner at $timestamp" > /home/log_file.txt
+          echo "Log file created at /home/log_file.txt"
 
   pause-instance:
     runs-on: ubuntu-latest

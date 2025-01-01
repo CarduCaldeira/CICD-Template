@@ -39,6 +39,4 @@ COPY --from=uv-dev /app/.venv/ /app/.venv/
 WORKDIR /app
 COPY /src/ ./src/
 
-CMD [".venv/bin/python3","./src/main.py"]
-
 #docker build -t pytorch- .

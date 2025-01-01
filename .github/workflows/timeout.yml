@@ -4,8 +4,6 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:
-
 jobs:
   timeout:
     timeout-minutes: 6
@@ -15,7 +13,6 @@ jobs:
     steps:
       - name: Cancel specific deploy job if queued
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SLEEP_DURATION: ${{ vars.SLEEP_DURATION }}
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
           JOB_NAME: ${{ vars.JOB_NAME }}

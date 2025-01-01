@@ -17,14 +17,22 @@ jobs:
           SLEEP_DURATION: ${{ vars.SLEEP_DURATION }}
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
           JOB_NAME: ${{ vars.JOB_NAME }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
         run: |
           sleep $SLEEP_DURATION
           
-          JOB_ID=$(gh -R {owner}/{repo} run list -w $WORKFLOW_NAME -s queued --json jobs --jq ".[] | select(.name==\"$JOB_NAME\") | .databaseId" | head -n 1)
+          RUN_ID=$(gh run list -w "$WORKFLOW_NAME" -s queued --json databaseId --jq '.[0].databaseId' -R "$OWNER/$REPO")
           
-          if [ -n "$JOB_ID" ]; then
-            echo "Canceling job: $JOB_NAME with ID: $JOB_ID"
-            gh -R {owner}/{repo} run cancel $JOB_ID
+          if [ -n "$RUN_ID" ]; then
+            JOB_FOUND=$(gh run view "$RUN_ID" --json jobs --jq ".jobs[] | select(.name==\"$JOB_NAME\") | .id" -R "$OWNER/$REPO")
+            
+            if [ -n "$JOB_FOUND" ]; then
+              echo "Canceling job: $JOB_NAME in run ID: $RUN_ID"
+              gh run cancel "$RUN_ID" -R "$OWNER/$REPO"
+            else
+              echo "No queued job named $JOB_NAME found in run ID: $RUN_ID"
+            fi
           else
-            echo "No queued job named $JOB_NAME found"
+            echo "No queued run found for workflow $WORKFLOW_NAME"
           fi

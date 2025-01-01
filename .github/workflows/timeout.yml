@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Cancel specific deploy job if queued
         env:
-          GH_TOKEN: ${{ github.jarvis }}
+          GH_TOKEN: ${{ github.token }}
           SLEEP_DURATION: ${{ vars.SLEEP_DURATION }}
           WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
           JOB_NAME: ${{ vars.JOB_NAME }}

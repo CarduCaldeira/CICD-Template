@@ -35,7 +35,8 @@ jobs:
           SCRIPT_NAME: ${{ vars.SCRIPT_NAME }}
         run: |
           python apiclient.py run_instance
-
+    timeout-minutes: 5
+    
   self-hosted-task:
     runs-on: self-hosted
     needs: web-instance
@@ -62,11 +63,13 @@ jobs:
         run: uv sync 
 
       - name: Run tests
-        run: uv run pytest 
+        run: uv run pytest
+    timeout-minutes: 5
 
   pause-instance:
     runs-on: ubuntu-latest
-    needs: self-hosted-task
+    if: ${{ always()}}
+    needs: [web-instance, self-hosted-task]
     steps:
       - name: Check out repository
         uses: actions/checkout@v4

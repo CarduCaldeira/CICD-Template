@@ -22,17 +22,11 @@ jobs:
         run: |
           sleep $SLEEP_DURATION
           
-          RUN_ID=$(gh run list -w "$WORKFLOW_NAME" -s queued --json databaseId --jq '.[0].databaseId' -R "$OWNER/$REPO")
+          RUN_ID=$(gh run list -w "$WORKFLOW_NAME" -s queued --json databaseId --q .[].databaseId)
           
           if [ -n "$RUN_ID" ]; then
-            JOB_FOUND=$(gh run view "$RUN_ID" --json jobs --jq ".jobs[] | select(.name==\"$JOB_NAME\") | .id" -R "$OWNER/$REPO")
-            
-            if [ -n "$JOB_FOUND" ]; then
-              echo "Canceling job: $JOB_NAME in run ID: $RUN_ID"
-              gh run cancel "$RUN_ID" -R "$OWNER/$REPO"
-            else
-              echo "No queued job named $JOB_NAME found in run ID: $RUN_ID"
-            fi
+            gh -R {owner}/{repo} run list -w "$WORKFLOW_NAME" -s queued --json databaseId -q .[].databaseId | xargs gh -R "$OWNER/$REPO" run cancel
+
           else
             echo "No queued run found for workflow $WORKFLOW_NAME"
           fi

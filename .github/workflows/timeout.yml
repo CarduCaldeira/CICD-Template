@@ -1,0 +1,32 @@
+name: Cancel specific deploy job on timeout
+
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  timeout:
+    timeout-minutes: 6
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Cancel specific deploy job if queued
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SLEEP_DURATION: ${{ vars.SLEEP_DURATION }}
+          WORKFLOW_NAME: ${{ vars.WORKFLOW_NAME }}
+          JOB_NAME: ${{ vars.JOB_NAME }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        run: |
+          sleep $SLEEP_DURATION
+          
+          RUN_ID=$(gh -R "$OWNER/$REPO" run list -w "$WORKFLOW_NAME" -s queued --json databaseId -q .[].databaseId)
+          
+          if [ -n "$RUN_ID" ]; then
+            gh -R "$OWNER/$REPO" run list -w "$WORKFLOW_NAME" -s queued --json databaseId -q .[].databaseId | xargs gh -R "$OWNER/$REPO" run cancel
+
+          else
+            echo "No queued run found for workflow $WORKFLOW_NAME"
+          fi

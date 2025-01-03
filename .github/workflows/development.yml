@@ -41,12 +41,6 @@ jobs:
     runs-on: self-hosted
     needs: web-instance
     steps:
-      - name: Create a log file with timestamp
-        run: |
-          timestamp=$(date "+%Y-%m-%d %H:%M:%S")
-          echo "Task executed on self-hosted runner at $timestamp" > /home/novousuario/log_file.txt
-          echo "Log file created at /home/novousuario/log_file.txt"
-
       - uses: actions/checkout@v4
 
       - name: Install the project

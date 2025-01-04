@@ -57,3 +57,5 @@ markdown_extensions:
   - pymdownx.highlight
   - markdown_include.include:
       base_path: ./
+  - pymdownx.snippets:
+      base_path: !relative $config_dir

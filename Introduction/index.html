@@ -241,10 +241,10 @@
 <p>Este projeto oferece um <strong>template de pipeline CI/CD</strong> especificamente projetado para projetos que requerem o uso de GPUs. Enquanto o <strong>GitHub Actions</strong> fornece uma estrutura robusta para gerenciar fluxos de trabalho de integração e entrega contínuas, ele não possui soluções nativas para tarefas que exigem processamento gráfico acelerado. Para suprir essa lacuna, este template integra <strong>self-hosted runners</strong> na nuvem <a href="https://jarvislabs.ai/" title="https://jarvislabs.ai/">Jarvis</a>
  , permitindo que os usuários aproveitem os recursos de GPU. </p>
 <p>Para o uso em outros servições cloud a implementação seria similar. Na figura abaixo é apresentado a diagramação do pipeline.</p>
-<p><img alt="Arch" src="docs/assets/images/arch.png"/> </p>
+<p><img alt="Arch" src="./docs/assets/images/arch.png"/> </p>
 <h2 id="instalacao-do-self-hosted-no-jarvis">Instalação do Self Hosted no Jarvis</h2>
 <p>Para o uso do git hub actions self hosted é necessário a instalação no ambiente com GPU que será utilizado, nesse caso uma instância do Jarvis. A instalação pode ser feita conforme a documentação oficial.</p>
-<p><img alt="Runner" src="docs/assets/images/runner.png"/></p>
+<p><img alt="Runner" src="./docs/assets/images/runner.png"/></p>
 <p>Para a instalação do runner foi implementado um script shell (scripts_jarvis/construct_env.sh) para automatizar a sua instalação e possibilitar a correta configuração de ambiente. Como o runner deve ser executado como usuário não root, foi necessário criar usuario e lhe conceder as permissões para o uso das pastas (por limitações do Jarvis essa etapa é necessária):</p>
 <ul>
 <li>

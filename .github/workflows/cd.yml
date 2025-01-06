@@ -1,10 +1,9 @@
-name: cd
+name: ci
 
 on:
   push:
       branches:
         - main 
-        - development
 
 jobs:
   build:
@@ -36,7 +35,6 @@ jobs:
               "root-cache-uv": "/root/.cache/uv"
             }
           skip-extraction: ${{ steps.cache.outputs.cache-hit }}
-
 
       - name: Build and push
         uses: docker/build-push-action@v6

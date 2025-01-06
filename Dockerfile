@@ -6,7 +6,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
         gcc && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-FROM base AS uv-dev
+FROM base AS development
 
 ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
 
@@ -31,7 +31,7 @@ COPY uv.lock pyproject.toml .
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --frozen --no-install-project --no-dev
 
-FROM base AS inference
+FROM base AS runtime
 
 COPY --from=uv-dev /root/.local/share/uv/python/ /root/.local/share/uv/python/
 COPY --from=uv-dev /app/.venv/ /app/.venv/

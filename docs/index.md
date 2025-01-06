@@ -7,13 +7,13 @@ Este projeto oferece um **template de pipeline CI/CD** especificamente projetado
 
 Para o uso em outros servições cloud a implementação seria similar. Na figura abaixo é apresentado a diagramação do pipeline.
 
-![Arch](./docs/assets/images/arch.png) 
+![Arch](./assets/images/arch.png) 
 
 ## Instalação do Self Hosted no Jarvis
 
 Para o uso do git hub actions self hosted é necessário a instalação no ambiente com GPU que será utilizado, nesse caso uma instância do Jarvis. A instalação pode ser feita conforme a documentação oficial.
 
-![Runner](./docs/assets/images/runner.png)
+![Runner](./assets/images/runner.png)
 
 Para a instalação do runner foi implementado um script shell (scripts_jarvis/construct_env.sh) para automatizar a sua instalação e possibilitar a correta configuração de ambiente. Como o runner deve ser executado como usuário não root, foi necessário criar usuario e lhe conceder as permissões para o uso das pastas (por limitações do Jarvis essa etapa é necessária):
 

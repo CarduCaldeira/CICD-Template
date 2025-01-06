@@ -41,3 +41,6 @@ jobs:
         with:
           tags: carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime
           push: true
+          cache-from: type=registry,ref=carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime
+          cache-to: type=registry,ref=carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime,mode=max
+          

@@ -4,6 +4,7 @@ on:
   push:
       branches:
         - main 
+        - development
 
 jobs:
   build:
@@ -28,7 +29,7 @@ jobs:
           key: ${{ runner.os }}-uv-cache-mount-${{ hashFiles('uv.lock') }}
 
       - name: Inject uv-cache-mount
-        uses: reproducible-containers/buildkit-cache-dance@3.1.0 
+        uses: reproducible-containers/buildkit-cache-dance@v3.1.0 
         with:
           cache-map: |
             {

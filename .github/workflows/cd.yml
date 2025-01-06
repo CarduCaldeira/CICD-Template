@@ -8,6 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - base
+          - inference
+
     steps:
       - name: Check out the repository
         uses: actions/checkout@v4
@@ -39,8 +45,6 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          tags: carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime
           push: true
-          cache-from: type=registry,ref=carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime
-          cache-to: type=registry,ref=carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime,mode=max
-          
+          target: ${{ matrix.target }}
+          tags: carloscaldeira/pytorch:2.5.1-cuda12.4-uv-${{ matrix.target }}

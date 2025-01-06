@@ -1,4 +1,4 @@
-name: ci
+name: cd
 
 on:
   push:
@@ -11,8 +11,8 @@ jobs:
     strategy:
       matrix:
         target:
-          - base
-          - inference
+          - development
+          - runtime
 
     steps:
       - name: Check out the repository

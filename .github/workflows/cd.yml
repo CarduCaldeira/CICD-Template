@@ -38,6 +38,4 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          cache-from: type=registry
-          cache-to: type=registry,mode=max
           tags: carloscaldeira/pytorch:2.5.1-cuda12.4-uv-runtime

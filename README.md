@@ -72,6 +72,8 @@ interpretador será baixado em ~/.local/share/uv/python/. Caso já exista um int
 
 - uv sync: Para instalar as bibliotecas do projeto em pyproject.toml. Nesse caso, o comando uv sync também irá atualizar o arquivo uv.lock. Para casos em que o uv.lock ja foi gerado previamente ou não previsa ser atualizado o comando uv sync --frozen irá instalar a bibliotecas sem gerar o arquivo uv.lock novamente.
 
+- uv export --only-group doc > requirements.txt: Exporta apenas um grupo de dependencias (doc nesse caso) para um arquivo .txt.
+
 Nesse projeto também foi utilizado a variavel de ambiente UV_COMPILE_BYTECODE=1, que sinaliza ao uv para criar arquivos bytecode dos scripts python, aumentando a perfomace nas execuções seguintes dos mesmos scripts.
 
 --------------------

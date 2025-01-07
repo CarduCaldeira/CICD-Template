@@ -33,8 +33,8 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 FROM base AS runtime
 
-COPY --from=uv-dev /root/.local/share/uv/python/ /root/.local/share/uv/python/
-COPY --from=uv-dev /app/.venv/ /app/.venv/
+COPY --from=development /root/.local/share/uv/python/ /root/.local/share/uv/python/
+COPY --from=development /app/.venv/ /app/.venv/
 
 WORKDIR /app
 COPY /src/ ./src/

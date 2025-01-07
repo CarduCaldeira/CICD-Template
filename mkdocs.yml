@@ -1,6 +1,6 @@
 site_name: CICD-to-GPU-Projects
-repo_url: https://github.com/CarduCaldeira/
-site_url: https://carducaldeira.github.io/GPU-CICD-Pipeline-Template/Introduction/
+repo_url: https://github.com/CarduCaldeira/GPU-CICD-Pipeline-Template
+site_url: https://carducaldeira.github.io/GPU-CICD-Pipeline-Template/
 docs_dir: docs/
 theme:
   name: material

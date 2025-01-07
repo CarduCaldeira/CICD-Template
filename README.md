@@ -1,112 +1,129 @@
 # CICD-to-GPU-Projects
 
-## Descrição do Projeto
+## Project Description
 
-Este projeto oferece um **template de pipeline CI/CD** especificamente projetado para projetos que requerem o uso de GPUs. Enquanto o **GitHub Actions** fornece uma estrutura robusta para gerenciar fluxos de trabalho de integração e entrega contínuas, ele não possui soluções nativas para tarefas que exigem processamento gráfico acelerado. Para suprir essa lacuna, este template integra **self-hosted runners** na nuvem [Jarvis](https://jarvislabs.ai/ "https://jarvislabs.ai/")
- , permitindo que os usuários aproveitem os recursos de GPU. 
+This project offers a **CI/CD pipeline template** specifically designed for projects that require the use of GPUs. While **GitHub Actions** provides a robust framework for managing continuous integration and delivery workflows, it lacks native solutions for tasks requiring accelerated graphical processing. This template integrates **self-hosted runners** in the [Jarvis](https://jarvislabs.ai/ "https://jarvislabs.ai/") cloud, allowing users to leverage GPU resources.
 
-Para o uso em outros servições cloud a implementação seria similar. Na figura abaixo é apresentado a diagramação do pipeline.
+For use in other cloud services, the implementation would be similar. The diagram below displays the pipeline layout.
 
-![Arch](./docs/assets/images/arch.png) 
+![Arch](https://images-markdown.s3.us-east-2.amazonaws.com/arch.png) 
 
-## Instalação do Self Hosted no Jarvis
+## Installation of the Self-Hosted Runner on Jarvis
 
-Para o uso do git hub actions self hosted é necessário a instalação no ambiente com GPU que será utilizado, nesse caso uma instância do Jarvis. A instalação pode ser feita conforme a documentação oficial.
+To use GitHub Actions self-hosted runners, installation in the GPU environment is required, which in this case is a Jarvis instance. The installation can be done following the official documentation.
 
-![Runner](./docs/assets/images/runner.png)
+![Runner](https://images-markdown.s3.us-east-2.amazonaws.com/runner.png)
 
-Para a instalação do runner foi implementado um script shell (scripts_jarvis/construct_env.sh) para automatizar a sua instalação e possibilitar a correta configuração de ambiente. Como o runner deve ser executado como usuário não root, foi necessário criar usuario e lhe conceder as permissões para o uso das pastas (por limitações do Jarvis essa etapa é necessária):
+A shell script (scripts_jarvis/construct_env.sh) was implemented to automate the installation and enable proper environment configuration for the runner installation. Since the runner must be executed as a non-root user, it was necessary to create a user and grant permissions for folder usage (this step is necessary due to Jarvis limitations):
 
-- /home/.local/share/: O gerenciamento de pacotes Python é realizado por meio da ferramenta uv. Com ouv é possivel instalar uma versão especifica do interpretador python. O binário é salvo em /home/.local/share/uv/python. 
+/home/.local/share/: Python package management is done through the uv tool. With uv, you can install a specific version of the Python interpreter. The binary is saved in /home/.local/share/uv/python.
 
-- /home/.cache: O cache dos downloads das bibliotecas python são salvos nesta pasta.
+/home/.cache: The cache for Python library downloads is saved in this folder.
 
-- /home/$USER: Necessário para o uv poder criar o ambiente virtual (.venv) com as bibliotecas instaladas.
+/home/$USER: Needed for uv to create the virtual environment (.venv) with the installed libraries.
 
-No script os campos *** devem ser substituidos pelos campos informados para o seu runner informado pelo github actions.
+In the script, fields marked with *** should be replaced with the fields provided for your runner as specified by GitHub Actions.
 
-## Etapas do Pipeline
+## Pipeline Stages
 
-Como a branch main foi bloqueada para push diretamente, o push só pode ocorrer via pull request de branches auxiliares, como a development. Uma vez triggado o pull request para a main o pipeline (executado em .github/workflows/development.yml) consistirá das seguintes etapas:
+Since the main branch has been blocked from direct pushes, pushing can only occur via pull requests from auxiliary branches such as development. Once a pull request to main is triggered, the pipeline (executed in .github/workflows/development.yml) will consist of the following stages:
 
-- Inicialização da instancia previamente configurada. A iniciação é realizada por meio do script apiclient.py, que conecta com a API do Jarvis e inicia a instancia. Ao iniciar a instancia o script  scripts_jarvis/start_runner.sh é executado na instancia que cria novamente o usuario (a instancia nao tem persistencia fora de /home, portanto o usario criado na configuração do ambiente é perdido apesar das pastas persistirem) e executa o runner. Para executar o script start_runner.sh no Jarvis é necessário o upload previamente do script nas configurações de usuario do Jarvis.
+Initialization of the pre-configured instance. The initiation is carried out by the apiclient.py script, which connects to the Jarvis API and starts the instance. Upon starting the instance, the scripts_jarvis/start_runner.sh script is executed on the instance, recreating the user (as the instance does not persist outside of /home, the user created during environment setup is lost though the folders persist) and executes the runner. To execute the start_runner.sh script on Jarvis, the script must be previously uploaded in the user configurations of Jarvis.
 
-- Testes/Execução no ambinete self hosted.
+Testing/Execution in the self-hosted environment.
 
-- Pausa da instancia realizada por meio do script apiclient.py.
+Pausing the instance is done through the apiclient.py script.
 
-Em alguns poucos casos foi observado que a etapa de teste no ambiente self hosted ficou em estado de queue, aguardando o runner aceitar o job. Para contornar essa situação foi implementado um pipeline auxiliar em .github/workflows/timeout.yml que depois de um tempo especificado verifica se tem algum job em estado de queue e caso sim cancela o workflow. A solução implementada foi baseada na discussão https://github.com/orgs/community/discussions/50926, pois a configuração timeout-minutes não é aplicada para jobs em estado de queue. 
+In some rare cases, it was observed that the test stage in the self-hosted environment remained in a queued state, waiting for the runner to accept the job. To address this, an auxiliary pipeline was implemented in .github/workflows/timeout.yml, which, after a specified time, checks if there are jobs in a queued state and cancels the workflow if so. This solution was based on the discussion at https://github.com/orgs/community/discussions/50926 since the timeout-minutes configuration does not apply to jobs in a queued state.
 
-Também, apesar de o marketplace do github actions possuir um job que instala o uv, o job para a instalação do uv do ambiente self hosted foi implementa devido as configurações pré-existentes na instancia do Jarvis, que instala o uv por meio do miniconda e devido as limitações de permissão do usuario nao root o melhor caminho foi realizar a instalação do uv diretamente.
+Additionally, although the GitHub Actions marketplace offers a job that installs uv, the job for installing uv in the self-hosted environment was implemented due to pre-existing configurations on the Jarvis instance, which installs uv via Miniconda. Due to non-root user permission limitations, the best approach was to install uv directly.
 
-Para implementação do pipeline é necessário configurar no github actions:
+To implement the pipeline, it's necessary to configure the following in GitHub Actions:
 
-- Secret TOKEN_JARVIS: utilizado pelo apiclient.py para conectar ao Jarvis.
+Secret TOKEN_JARVIS: Used by apiclient.py to connect to Jarvis.
 
-- Variavel INSTANCE_NAME: Nome da instancia no Jarvis que o apiclient.py ira iniciar/pausar/
+Variable INSTANCE_NAME: The name of the Jarvis instance that apiclient.py will start/pause.
 
-- Variavel SCRIPT_NAME: Nome dado ao script apresentado em scripts_jarvis/start_runner.sh no no upload em configurações do Jarvis. O nome do script é necessário para denotar que ele deve ser executado (para iniciar o runner).
+Variable SCRIPT_NAME: The name given to the script uploaded from scripts_jarvis/start_runner.sh in the Jarvis settings. This script name is required to specify that it should be executed to start the runner.
 
-- Variavel SLEEP_DURATION: Tempo de espera para o workflow timeout.yml verificar se há algum job em estado de queue.
+Variable SLEEP_DURATION: The waiting time for the timeout.yml workflow to check if there are any jobs in a queued state.
 
-- Variavel WORKFLOW_NAME: Nome do workflow que timeout.yml irá verificar se há um job em estado de queue.
+Variable WORKFLOW_NAME: The name of the workflow that timeout.yml will monitor to see if there is a job in a queued state.
 
 ## Cloud Jarvis
 
-No script python  apliclient.py é realizado a conexão com a API do Jarvis, para mais detalhes verifique a documentação em  [Documentação em jarvislabs.ai](https://docs.jarvislabs.ai/api/ "https://docs.jarvislabs.ai/api/") e [Repositório](https://github.com/jarvislabsai/JLClient "https://github.com/jarvislabsai/JLClient").
+In the Python script apiclient.py, a connection to the Jarvis API is established. For more details, please refer to the documentation at [Jarvis Labs Documentation](https://docs.jarvislabs.ai/api/ "https://docs.jarvislabs.ai/api/") and the  [Repository](https://github.com/jarvislabsai/JLClient "https://github.com/jarvislabsai/JLClient").
 
-## Ferramentas utilizadas: UV e MKDOCS
+## Tools Used: UV and MKDOCS
 
 ### UV
 
-Para gerenciamento de pacotes e de projetofoi utilizado o uv. Para verificar sua dodumentação e instalção. Alguns dos comandos utilizados:
+UV is used for package and project management. Below are some commands and their purposes:
 
-- uv python install <versao> (ex: 3.12): O uv faz o gerenciamento das versões python, ao dar o comando ele ira baixar e instalar o interpretador python da versão especificada. Por padrão o
-interpretador será baixado em ~/.local/share/uv/python/. Caso já exista um interpretador instalado na versão especificada, como por exemplo em /usr/bin/python3.12 ele irá utilizar o interpretador disponivel.
+- uv python install < version > (e.g., 3.12): UV manages Python versions. This command downloads and installs the specified Python version's interpreter. By default, the interpreter is stored in ~/.local/share/uv/python/. If an interpreter for the specified version already exists (e.g., in /usr/bin/python3.12), it will use the available interpreter.
 
-- uv run: Para rodar um script no enviroment desenvolvido. Para rodar com o comando python basta ativar o ambiente virtual com source .venv/bin/activate.
+- uv run: To run a script in the developed environment. To execute using Python, activate the virtual environment with source .venv/bin/activate.
 
-- uv add: Para instalar uma biblioteca (ao contrário do poetry que o comando add apenas modifica o arquivo pyproject.toml o uv realiza a instalação, atualizando o pyproject.toml, .venv e o uv.lock). Para instalar um biblioteca em um grupo especifico, por exemplo: 
-    - uv add --group lint ruff: Nesse caso a biblioteca será instalada pelo grupo lint.
-    - O comando uv add --dev pytest é o mesmo que uv add -group dev pytest.
+- uv add: Installs a library and updates pyproject.toml, .venv, and uv.lock. To install a library in a specific group:
 
-- uv sync: Para instalar as bibliotecas do projeto em pyproject.toml. Nesse caso, o comando uv sync também irá atualizar o arquivo uv.lock. Para casos em que o uv.lock ja foi gerado previamente ou não previsa ser atualizado o comando uv sync --frozen irá instalar a bibliotecas sem gerar o arquivo uv.lock novamente.
+    - uv add --group lint ruff: Installs the library in the 'lint' group.
+    - uv add --dev pytest is equivalent to uv add --group dev pytest.
 
-- uv export --only-group doc > requirements.txt: Exporta apenas um grupo de dependencias (doc nesse caso) para um arquivo .txt.
+- uv sync: Installs the project libraries specified in pyproject.toml and updates uv.lock. For cases where uv.lock is pre-generated or doesn't need updating, use uv sync --frozen to install libraries without regenerating uv.lock.
 
-Nesse projeto também foi utilizado a variavel de ambiente UV_COMPILE_BYTECODE=1, que sinaliza ao uv para criar arquivos bytecode dos scripts python, aumentando a perfomace nas execuções seguintes dos mesmos scripts.
+- uv export --only-group doc > requirements.txt: Exports only a specific group of dependencies (e.g., 'doc') to a .txt file.
 
---------------------
+In this project, the environment variable UV_COMPILE_BYTECODE=1 was used. This setting tells UV to create bytecode files for Python scripts, which enhances performance in subsequent executions of those scripts.
 
 ### MKDOCS
 
-A documentação do projeto é realizada por meio do mkdocs, gerando um site estático que quando realizado o pull request na main é atualizada e disponibilizada como uma pagina web. Para gerar um documento no formato pdf é utilizado o mkdocs exporter, esse documento é salvo em um bucket S3.
+The project documentation is carried out using MkDocs, generating a static site. For deploying the page through GitHub Actions, run the following command locally:
+
+```
+uv run mkdocs gh-deploy
+```
+
+It is also necessary to configure the branch that GitHub Pages will use to generate the site.
+
+The documentation generated by MkDocs can be viewed at https://carducaldeira.github.io/GPU-CICD-Pipeline-Template/.
 
 ## Docker
 
-Após a a realização do pull request para a main é realizado o build de uma imagem docker com pytorch e os drivers do cuda. Para esta etapa além da imagem ubuntu de base foram testadas as imagens da nvidia que já possuem os drivers cuda instalados https://hub.docker.com/r/nvidia/cuda/tags, no entento foi observado que após a instalação do pytorch a imagem superou 8GB (em comparação com a imagem Pytorch oficial que possui em torno de 6GB, denpendendo a versão, depois de descomprimida), devido a instalação do cuda pelo pytorch, duplicando alguns arquivos de forma desnecessária.
+After executing a pull request to the main branch, a Docker image is built with PyTorch and CUDA drivers. For this process, besides using the base Ubuntu image, NVIDIA images with pre-installed CUDA drivers were tested (https://hub.docker.com/r/nvidia/cuda/tags). However, it was observed that after installing PyTorch, the image exceeded 8GB (compared to the official PyTorch image, which is around 6GB, depending on the version, once decompressed), due to CUDA installation by PyTorch, leading to unnecessary duplication of some files.
 
-Como base foi tomado como referencia a imagem runtime do pytorch, construída utilizando multi-stage build em [Dockerfile Pytorch](https://github.com/pytorch/pytorch/blob/main/Dockerfile "https://github.com/pytorch/pytorch/blob/main/Dockerfile") é possível verificar a imagem. A diferença para a imagem construída nesse projeto está sobretudo na substuição do miniconda (utilizado para instalar o pytorch na imagem base ubuntu) pelo uv, dessa forma não foram instalados os pacotes ccache e cmake necessários para a instalação do miniconda.
+The multi-stage build approach taken is inspired by the PyTorch runtime image, constructed using a multi-stage build as seen in the [PyTorch Dockerfile](https://github.com/pytorch/pytorch/blob/main/Dockerfile "https://github.com/pytorch/pytorch/blob/main/Dockerfile"). The key variation in this project is replacing Miniconda (used to install PyTorch in the base Ubuntu image) with UV, eliminating the need to install ccache and cmake packages required for Miniconda.
 
-O Dockerfile desse projeto foi estruturado em multi-stage build. Um ponto relevante é que nesse pipeline o build é realizado após os testes, porém dependendo o contexto o build pode ser vantajoso realizar o build antes dos testes, como apresentado nesse tutorial [Tutorial YouTube](https://youtu.be/aZzV6X7XhyI?si=HwJjvUHOsQ7b16-v "https://youtu.be/aZzV6X7XhyI?si=HwJjvUHOsQ7b16-v"). A diferença no Dockerfile seria a criação de mais um etapa de de build, criando um ambiente de testes com suas respectivas configurações. 
+This project's Dockerfile follows a multi-stage build structure. In this pipeline, the build occurs after testing; however, depending on the context, conducting the build before testing can be advantageous, as shown in this [YouTube Tutorial](https://youtu.be/aZzV6X7XhyI?si=HwJjvUHOsQ7b16-v "https://youtu.be/aZzV6X7XhyI?si=HwJjvUHOsQ7b16-v"). This would necessitate an additional build stage to create a testing environment with the required configurations.
 
-## Estrutura de pastas
+To optimize the Docker image build process, two caching strategies were employed: cache mount and cache registry [Docker Documentation ](https://docs.docker.com/build/ci/github-actions/cache/). The cache mount strategy was implemented, resulting in a significant reduction in build time. The cache registry strategy was not adopted due to GitHub Actions' space limitations, in this [Issue]() it is discussed about this.
 
-A seguir é apresentado a estrutura de pastas do projeto:
+The builds resulted in two images available at https://hub.docker.com/repository/docker/carloscaldeira/pytorch/general.
+
+ These images pertain to two environments: the development environment includes PyTorch and CUDA, as well as the UV Python package installer. The second image excludes UV, retaining only the pre-installed Python packages to reduce its size, demonstrating how a runtime image could be generated from the development image in a CI/CD pipeline. To install additional libraries beyond PyTorch with CUDA, you can base your Dockerfile on the development image:
+
+```
+FROM carloscaldeira/pytorch:2.5.1-cuda12.4-uv-development
+```
+
+Although the image provided in this pipeline is smaller than the official PyTorch image, some Docker images are specifically optimized for this purpose. For such optimization goals, consider exploring the use of  [Chainguard](https://images.chainguard.dev/directory/image/pytorch/versions) images.
+
+The primary focus of this project is developing the CI/CD template itself. However, one of its future goals is to enhance the continuous delivery pipeline to allow creating Docker images for various combinations of PyTorch and CUDA versions.
+
+## Folder Structure
+
+Below is the project's folder structure:
 
 ```
 ├── apiclient.py
-├── assets
-│   └── arch.png
+├── requirements_jarvis.txt
 ├── Dockerfile
 ├── pyproject.toml
+├── uv.lock
 ├── README.md
-├── requirements_jarvis.txt
 ├── src
 │   └── main.py
 ├── tests
 │   └── pytorch_test.py
-├── uv.lock
 ├── mkdocs.yml
 ├── docs
 ├── .githooks
@@ -114,27 +131,26 @@ A seguir é apresentado a estrutura de pastas do projeto:
 └── .github
     └── workflows
         ├── development.yml
-        ├── main.yml
+        ├── cd.yml
         └── timeout.yml
 ```
 
-- apiclient.py: Script python usado para iniciar/pausar uma instancia no Jarvis.
+- apiclient.py: Python script used to start/stop an instance in Jarvis.
 
-- requirements_jarvis.txt: Bibliotecas usadas para configurar o ambiente para usar o script apiclient.py.
+- requirements_jarvis.txt: Libraries used to set up the environment for using the apiclient.py script.
 
-- scripts_jarvis: Scripts shell utilizados para configurar e iniciar a instancia no Jarvis.
+- scripts_jarvis: Shell scripts used to configure and start the instance in Jarvis.
 
-- .github/workflows: Scripts de implementação do pipeline.
+- .github/workflows: Pipeline implementation scripts.
 
-- .githooks: 
+- .githooks: A pre-commit configured locally to prevent commits to the main branch.
 
-- src/main.py:  Script python de exemplo.
+- src/main.py: Example Python script.
 
-- tests/: Pasta de testes.
+- tests/: Test folder.
 
-- docs: Pasta com arquivos utilizados para gerar a documentação do projeto.
+- docs: Folder containing files used to generate the project's documentation.
 
-- mkdocs.yml: Arquivo de configuração do mkdocs.
+- mkdocs.yml: MkDocs configuration file.
 
-- Dockfile: Dockerfile usado para buildar a imagem com cuda e pytorch.
-
+- Dockerfile: Dockerfile used to build the image with CUDA and PyTorch.

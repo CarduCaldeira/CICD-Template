@@ -1,4 +1,4 @@
-name: CI Workflow
+name: CD Workflow
 
 on:
   pull_request:
@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install the project
-        run: uv sync 
+        run: uv sync --extra torch2.5.1-cu124
 
       - name: Run tests
         run: uv run pytest

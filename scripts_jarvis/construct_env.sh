@@ -21,7 +21,7 @@ chmod -R 777 /home/.local/share/
 
 uv python install 3.12
 
-mkdir $USERNAME/actions-runner && chmod -R 777 actions-runner/ && cd $USERNAME/actions-runner
+mkdir $USERNAME/actions-runner && chmod -R 777 $USERNAME/actions-runner/ && cd $USERNAME/actions-runner
 
 curl -o actions-runner-linux-x64-2.321.0.tar.gz -L https://github.com/actions/runner/releases/download/v2.321.0/actions-runner-linux-x64-2.321.0.tar.gz
 echo "***  actions-runner-linux-x64-2.321.0.tar.gz" | shasum -a 256 -c

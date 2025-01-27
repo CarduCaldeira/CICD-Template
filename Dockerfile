@@ -26,10 +26,10 @@ RUN uv python install 3.12
 
 WORKDIR /app
 
-COPY uv.lock pyproject.toml .
+COPY uv.lock* pyproject.toml .
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-install-project --no-dev
+    uv sync --extra torch2.5.1-cu124 --no-install-project --no-dev
 
 FROM base AS runtime
 
@@ -38,5 +38,3 @@ COPY --from=development /app/.venv/ /app/.venv/
 
 WORKDIR /app
 COPY /src/ ./src/
-
-#docker build -t pytorch- .

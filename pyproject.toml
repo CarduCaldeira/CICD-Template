@@ -4,10 +4,43 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "numpy>=2.2.1",
-    "torch>=2.5.1",
+dependencies = []
+
+[project.optional-dependencies]
+"torch2.5.1-cu121" = ["torch==2.5.1"]
+"torch2.4.0-cu124" = ["torch==2.4.0"]
+"torch2.5.1-cu124" = ["torch==2.5.1"]
+
+[tool.uv]
+
+package = false
+
+conflicts = [
+    [
+      { extra = "torch2.5.1-cu121" },
+      { extra = "torch2.4.0-cu124" },
+      { extra = "torch2.5.1-cu124" }
+    ],
 ]
+
+[tool.uv.sources]
+torch = [
+  { index = "cu121", extra = "torch2.5.1-cu121"},
+  { index = "cu124", extra = "torch2.4.0-cu124"},
+  { index = "cu124", extra = "torch2.5.1-cu124"},
+]
+
+[[tool.uv.index]]
+name = "cu121"
+url = "https://download.pytorch.org/whl/cu121"
+explicit = true
+
+
+[[tool.uv.index]]
+name = "cu124"
+url = "https://download.pytorch.org/whl/cu124"
+explicit = true
+
 
 [dependency-groups]
 dev = [
@@ -25,10 +58,6 @@ doc = [
     "playwright>=1.49.1",
     "mkdocs-macros-plugin>=1.3.7",
 ]
-
-[tool.uv]
-package = false
-
 
 [tool.ruff]
 line-length = 79  
